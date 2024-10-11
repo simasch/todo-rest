@@ -1,10 +1,10 @@
 package ch.martinelli.todorest.web;
 
+import ch.martinelli.todorest.repository.TodoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,23 +12,24 @@ import java.util.Optional;
 @RestController
 public class TodoController {
 
-    private final List<Todo> todos;
+    private final TodoRepository todoRepository;
 
-    public TodoController() {
-        this.todos = new ArrayList<>();
-        this.todos.add(new Todo(1L, "Einkaufen"));
+    public TodoController(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
     }
 
     @GetMapping
-    List<Todo> getAll() {
-        return todos;
+    List<Todo> getAll(@RequestParam(required = false) Boolean complete) {
+        if (complete == null) {
+            return todoRepository.findAll();
+        } else {
+            return todoRepository.findAllByCompleted(complete);
+        }
     }
 
     @GetMapping("{id}")
     ResponseEntity<Todo> getOne(@PathVariable Long id) {
-        Optional<Todo> any = todos.stream()
-                .filter(todo -> todo.getId().equals(id))
-                .findAny();
+        Optional<Todo> any = todoRepository.findById(id);
 
         return any.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -37,13 +38,16 @@ public class TodoController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     void createTodo(@RequestBody Todo todo) {
-        todos.add(todo);
+        todoRepository.save(todo);
     }
 
     @DeleteMapping("{id}")
     void delete(@PathVariable Long id) {
-        todos.stream()
-                .filter(todo -> todo.getId().equals(id))
-                .forEach(todo -> todo.setCompleted(true));
+        todoRepository.findById(id)
+                .ifPresent(todo -> {
+                            todo.setCompleted(true);
+                            todoRepository.save(todo);
+                        }
+                );
     }
 }

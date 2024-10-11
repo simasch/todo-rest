@@ -1,7 +1,12 @@
 package ch.martinelli.todorest.web;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
 public class Todo {
 
+    @Id
     private Long id;
     private String text;
     private boolean completed;

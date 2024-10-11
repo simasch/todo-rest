@@ -1,6 +1,9 @@
 ### Get all Todos
 GET http://localhost:8080/todos
 
+### Find all Todos by completed
+GET http://localhost:8080/todos?complete=true
+
 ### Get one Todo
 GET http://localhost:8080/todos/2
 
@@ -14,4 +17,4 @@ Content-Type: application/json
 }
 
 ### Delete Todo
-DELETE http://localhost:8080/todos/1
+DELETE http://localhost:8080/todos/2
